@@ -27,23 +27,26 @@
 				<extensions>true</extensions>
 				<configuration>
 				<cloudHubDeployment>
-				<username>sapacc</username>
+				<username>mkmule</username>
 				<environment>Sandbox</environment>
 				<workers>1</workers>
 				<workerType>Micro</workerType>
 				<applicationName>Salesforce-mysql-TrainingSession</applicationName>
-				<password>Api12345</password>
+				<password>Apisero@51525354</password>
 				<muleVersion>4.2.1</muleVersion>
 				</cloudHubDeployment>
-			   <sharedLibraries>
+				<sharedLibraries>
                         <sharedLibrary>
                             <groupId>mysql</groupId>
                             <artifactId>mysql-connector-java</artifactId>
                         </sharedLibrary>
                     </sharedLibraries>
-                </configuration>
+			    </configuration>
+                 
 			</plugin>
+			
 		<plugin>
+		
                 <groupId>com.mulesoft.munit.tools</groupId>
                 <artifactId>munit-maven-plugin</artifactId>
                 <version>${munit.version}</version>
