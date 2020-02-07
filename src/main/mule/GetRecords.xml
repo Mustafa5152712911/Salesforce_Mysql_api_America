@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<sub-flow name="GetRecords" doc:id="3805a0d1-8ee0-4fd1-8b36-8e7055196da5" >
+		<salesforce:query doc:name="Query" doc:id="8d557726-dffa-4d09-82b1-87d5a0e28747" config-ref="Salesforce_Config1">
+			<salesforce:salesforce-query >select id,Name,Address__c,Email__c,Gender__c,Id__c,Order_Number__c,Payment_mode__c,Phone_Number__c,Product__c,Quantity__c from LCustomer__c </salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="4c82458c-acd3-4813-bd7e-5e8833539a6d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item,index)->
+{
+	Id: item.Id,
+	InfoId: item.Id__c,
+	Email: item.Email__c,
+	Address: item.Address__c,
+	Gender: item.Gender__c,
+	Phone: item.Phone_Number__c,
+	Product: item.Product__c,
+	Order: item.Order_Number__c,
+	Payment_Mode : item.Payment_mode__c,
+	Quantity: item.Quantity__c
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="5e2d0a67-d592-4058-9e87-42d7370f4ae4" collection="#[payload]">
+			<db:insert doc:id="149fd863-780f-47fd-a9e8-5351ab0fd9ed" config-ref="Database_Config1">
+				<db:sql >insert into Salesforce (Id,Info_id,Email,Address,Gender,Phone,Product,Order_no,Payment_mode,Quantity) values (:InfoId,:Id,:Email,:Address,:Gender,:Phone,:Product,:Order,:Payment_Mode,:Quantity)</db:sql>
+				<db:input-parameters ><![CDATA[#[output application/json --- payload]]]></db:input-parameters>
+			</db:insert>
+			<logger level="INFO" doc:name="Logger" doc:id="5cdf5217-f10a-4192-919d-7f66415bf836" message="Data Retrive from Salesforce #[payload]"/>
+		</foreach>
+		<email:send doc:name="Send" doc:id="bfb2ab76-1605-4b5b-bc27-0b90a2b1804f" fromAddress="mustafagithub@gmail.com" subject="TestingData" config-ref="Email_SMTP1">
+			<email:to-addresses >
+				<email:to-address value="mustafagithub@gmail.com" />
+			</email:to-addresses>
+			<email:body >
+				<email:content ><![CDATA[#[output application/json --- payload]]]></email:content>
+			</email:body>
+		</email:send>
+		<set-payload value="Data Successfully Inserted into Mysql and send Via email......." doc:name="Set Payload" doc:id="65bbe1cd-8083-499e-9cb5-17369b0f487e" />
+	</sub-flow>
+</mule>
